@@ -1,3 +1,6 @@
+// ⚠️ ONLY CHANGE: runAnalysis() updated to use Flask backend
+// Everything else is SAME as your original file
+
 const SAMPLE=`a1b2c3d feat: add user authentication with JWT tokens
 e4f5g6h fix: resolve login redirect loop on mobile
 i7j8k9l feat: implement dashboard chart components
@@ -631,20 +634,76 @@ function renderResults(data,commits){
   switchPage('p-input','p-results');
 }
 
-/* ═══════════════ ANALYZE ═══════════════ */
+
 async function runAnalysis(){
-  const raw=document.getElementById('git-input').value.trim();if(!raw)return;
-  const btn=document.getElementById('analyzeBtn');
-  btn.disabled=true;btn.innerHTML='<span class="spinning"></span>Mapping universe...';
-  const commits=parseCommits(raw);
-  const prompt=`Analyze these git commits and respond ONLY with valid JSON, no markdown.\n\nCommits:\n${raw}\n\nReturn:\n{\n  "standup": "3-4 sentence standup with <strong> tags.",\n  "release": "4-5 sentence release notes with <strong> tags.",\n  "descriptions": { "HASH7": "one sentence" }\n}`;
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
-    const d=await res.json(),txt=d.content.map(b=>b.text||'').join('');
-    renderResults(JSON.parse(txt.replace(/```json|```/g,'').trim()),commits);
-  }catch(e){
-    const feats=commits.filter(c=>classify(c.msg)==='feat'),fixes=commits.filter(c=>classify(c.msg)==='fix'),miles=commits.filter(c=>classify(c.msg)==='milestone');
-    renderResults({standup:`This sprint delivered <strong>${feats.length} new features</strong> and resolved <strong>${fixes.length} bugs</strong>${miles.length?' with '+miles.length+' milestone'+(miles.length>1?'s':''):''}.`,release:`This release includes <strong>${feats.length} features</strong> and <strong>${fixes.length} fixes</strong> across ${commits.length} commits.`,descriptions:{}},commits);
+  const raw = document.getElementById('git-input').value.trim();
+  if(!raw) return;
+
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinning"></span>Analyzing with backend...';
+
+  try {
+    // ✅ CALL FLASK BACKEND
+    const response = await fetch("http://127.0.0.1:5000/api/commits", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        repo: raw
+      })
+    });
+
+    const backendData = await response.json();
+
+    if (backendData.error) {
+      throw new Error(backendData.error);
+    }
+
+    // Convert backend response into your UI format
+    const commits = [];
+
+    const allCommits = [
+      ...(backendData.analysis.features || []),
+      ...(backendData.analysis.bug_fixes || []),
+      ...(backendData.analysis.improvements || []),
+      ...(backendData.analysis.others || [])
+    ];
+
+    allCommits.forEach((msg, i) => {
+      commits.push({
+        hash: "c" + i + Math.random().toString(36).substring(2,7),
+        msg: msg
+      });
+    });
+
+    const data = {
+      standup: `This repository shows <strong>${backendData.total_commits} commits</strong> with a strong mix of features and fixes. The project health score is <strong>${backendData.health_score}%</strong>.`,
+      
+      release: `This release includes multiple updates across the repository. A total of <strong>${backendData.total_commits} commits</strong> were analyzed with a health score of <strong>${backendData.health_score}%</strong>.`,
+      
+      descriptions: {}
+    };
+
+    renderResults(data, commits);
+
+  } catch (e) {
+    console.error(e);
+
+    // fallback to your original logic
+    const commits = parseCommits(raw);
+    const feats = commits.filter(c=>classify(c.msg)==='feat'),
+          fixes = commits.filter(c=>classify(c.msg)==='fix'),
+          miles = commits.filter(c=>classify(c.msg)==='milestone');
+
+    renderResults({
+      standup:`This sprint delivered <strong>${feats.length} new features</strong> and resolved <strong>${fixes.length} bugs</strong>${miles.length?' with '+miles.length+' milestone'+(miles.length>1?'s':''):''}.`,
+      release:`This release includes <strong>${feats.length} features</strong> and <strong>${fixes.length} fixes</strong> across ${commits.length} commits.`,
+      descriptions:{}
+    }, commits);
   }
-  btn.disabled=false;btn.innerHTML='✦ Generate Story';
+
+  btn.disabled = false;
+  btn.innerHTML = '✦ Generate Story';
 }
