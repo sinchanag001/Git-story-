@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CommitVerse</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="cv">
+  <canvas id="gc"></canvas>
+
+  <!-- LANDING PAGE -->
+  <div class="page" id="p-land" onclick="goToInput()">
+    <div style="position:absolute;top:50%;left:50%;width:0;height:0;pointer-events:none">
+      <div class="nring" style="width:220px;height:220px;border-color:rgba(180,120,255,.18);animation-delay:0s"></div>
+      <div class="nring" style="width:220px;height:220px;border-color:rgba(255,120,200,.12);animation-delay:1.5s"></div>
+      <div class="nring" style="width:220px;height:220px;border-color:rgba(120,180,255,.09);animation-delay:3s"></div>
+    </div>
+    <div class="lrocket-wrap" id="lrocket">
+      <svg width="120" height="160" viewBox="0 0 90 130" fill="none">
+        <path d="M45 5 C30 5 21 24 21 45 L21 83 L69 83 L69 45 C69 24 60 5 45 5Z" fill="#1e0a35" stroke="#8855cc" stroke-width="1.5"/>
+        <ellipse cx="45" cy="40" rx="12" ry="14" fill="#120828" stroke="#aa77ff" stroke-width="1.2"/>
+        <ellipse cx="45" cy="38" rx="7" ry="8" fill="#3322aa" opacity=".8"/>
+        <circle cx="41" cy="34" r="3" fill="#ccbbff" opacity=".6"/>
+        <path d="M21 83 L4 108 L21 102Z" fill="#150830" stroke="#6633aa" stroke-width="1"/>
+        <path d="M69 83 L86 108 L69 102Z" fill="#150830" stroke="#6633aa" stroke-width="1"/>
+        <rect x="21" y="83" width="48" height="8" rx="3" fill="#100628" stroke="#4422aa" stroke-width=".8"/>
+        <ellipse cx="35" cy="102" rx="6" ry="14" fill="#ee6600" opacity=".7" id="fa"/>
+        <ellipse cx="45" cy="105" rx="8" ry="19" fill="#ff8800" id="fb"/>
+        <ellipse cx="55" cy="102" rx="6" ry="14" fill="#ee6600" opacity=".7" id="fc"/>
+        <ellipse cx="45" cy="102" rx="4" ry="11" fill="#ffee00" id="fd"/>
+      </svg>
+    </div>
+    <div class="cv-name">CommitVerse</div>
+    <div class="cv-tagline">Explore your project like a universe of commits.</div>
+    <div class="cv-hint">✦ click anywhere to launch ✦</div>
+  </div>
+
+  <!-- INPUT PAGE -->
+  <div class="page hidden" id="p-input">
+    <div class="p2-topbar">
+      <svg width="20" height="28" viewBox="0 0 90 130" fill="none">
+        <path d="M45 5 C30 5 21 24 21 45 L21 83 L69 83 L69 45 C69 24 60 5 45 5Z" fill="#2a1050" stroke="#8855cc" stroke-width="2"/>
+        <ellipse cx="45" cy="40" rx="12" ry="14" fill="#120828" stroke="#aa77ff" stroke-width="1.5"/>
+        <path d="M21 83 L4 108 L21 102Z" fill="#150830" stroke="#5533aa" stroke-width="1.2"/>
+        <path d="M69 83 L86 108 L69 102Z" fill="#150830" stroke="#5533aa" stroke-width="1.2"/>
+        <ellipse cx="45" cy="105" rx="8" ry="19" fill="#ff8800"/>
+        <ellipse cx="45" cy="102" rx="4" ry="11" fill="#ffee00"/>
+      </svg>
+      <span class="p2-logo-name">CommitVerse</span>
+      <span class="p2-step">Step 1 of 2</span>
+    </div>
+
+    <div class="input-center">
+      <div class="git-heading">Paste Commit History</div>
+
+      <textarea id="git-input" placeholder="abc1234 feat: add user authentication&#10;def5678 fix: resolve login redirect bug&#10;ghi9012 feat: implement dashboard charts&#10;jkl3456 release: v2.1.0 milestone&#10;mno7890 fix: patch XSS in comment input&#10;pqr1234 feat: add CSV export"></textarea>
+
+      <div class="btn-grid">
+        <button class="act-btn btn-blue" id="analyzeBtn" onclick="runAnalysis()">✦ Generate Story</button>
+        <button class="act-btn btn-green" onclick="loadSample()">Load Sample</button>
+        <div class="act-btn btn-drop" id="dropZone">
+          <div class="btn-drop-icon">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3" stroke="#aa77ff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><rect x="2" y="11" width="12" height="3" rx="1" stroke="#aa77ff" stroke-width="1.2"/></svg>
+          </div>
+          <span class="btn-drop-title">Drop your git log file here</span>
+          <span class="btn-drop-sub">or drag a .txt / .log file from GitHub</span>
+        </div>
+      </div>
+
+      <div class="btn-row-meta">
+        <span class="ccount" id="ccount">0 commits</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS PAGE -->
+  <div class="page hidden" id="p-results">
+    <div class="r-header">
+      <button class="r-back" onclick="goBack()">← back</button>
+      <span class="r-title">Your Commit Universe</span>
+    </div>
+
+    <div class="stats-row" id="statsRow"></div>
+    <div id="healthScoreCard"></div>
+    <div class="planet-row" id="planetRow"></div>
+
+    <!-- FILTER CHECKBOXES -->
+    <div class="filter-section">
+      <div class="filter-label">Filter by type</div>
+      <div class="checkbox-row" id="filterCheckboxes">
+        <label class="cb-item feat">
+          <input type="checkbox" checked onchange="applyCheckboxFilter()">
+          <span class="cb-box"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg></span>
+          <span class="cb-text">Features</span>
+        </label>
+        <label class="cb-item fix">
+          <input type="checkbox" checked onchange="applyCheckboxFilter()">
+          <span class="cb-box"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg></span>
+          <span class="cb-text">Bug Fixes</span>
+        </label>
+        <label class="cb-item mile">
+          <input type="checkbox" checked onchange="applyCheckboxFilter()">
+          <span class="cb-box"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg></span>
+          <span class="cb-text">Milestones</span>
+        </label>
+        <label class="cb-item chore">
+          <input type="checkbox" onchange="applyCheckboxFilter()">
+          <span class="cb-box"><svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg></span>
+          <span class="cb-text">Chores</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- JOURNEY PLAYBACK -->
+    <button class="journey-btn" id="journeyBtn" onclick="startJourney()">
+      <span class="jb-icon">🚀</span>
+      Play My Project Journey
+    </button>
+
+    <div class="planet-tabs">
+      <button class="ptab ptab-all on" onclick="setFilter('all',this)"><div class="p-orb"></div><span class="p-lbl">All</span></button>
+      <button class="ptab ptab-mile" onclick="setFilter('milestone',this)"><div class="p-orb"></div><span class="p-lbl">Milestones</span></button>
+      <button class="ptab ptab-feat" onclick="setFilter('feat',this)"><div class="p-orb"></div><span class="p-lbl">Features</span></button>
+      <button class="ptab ptab-fix" onclick="setFilter('fix',this)"><div class="p-orb"></div><span class="p-lbl">Bug fixes</span></button>
+      <button class="ptab ptab-stand" onclick="setFilter('standup',this)"><div class="p-orb"></div><span class="p-lbl">Standup</span></button>
+      <button class="ptab ptab-rel" onclick="setFilter('release',this)"><div class="p-orb"></div><span class="p-lbl">Release</span></button>
+    </div>
+
+    <div id="mainContent"></div>
+
+    <!-- BOTTOM TIMELINE -->
+    <div class="bottom-timeline" id="bottomTimeline" style="display:none">
+      <div class="bt-label">⬡ Project Timeline</div>
+      <div class="bt-track">
+        <div class="bt-rail"></div>
+        <div class="bt-nodes" id="btNodes"></div>
+      </div>
+    </div>
+
+    <!-- JOURNEY NARRATION OVERLAY -->
+    <div class="journey-overlay" id="journeyOverlay">
+      <div class="jo-step" id="joStep">Step 1</div>
+      <div class="jo-text" id="joText">Your project journey begins...</div>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
