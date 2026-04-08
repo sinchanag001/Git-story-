@@ -1,0 +1,86 @@
+/* ═══════════════════════════════════════════
+   base.css — design tokens, reset, page system
+   ═══════════════════════════════════════════ */
+
+:root {
+  --bg: #39254D;
+  --bg-deep: #2a1a3a;
+  --bg-card: #2f1f45;
+  --accent: #c8a8ff;
+  --accent2: #ff88cc;
+  --gold: #ffcc44;
+  --green: #44ddaa;
+  --border: #4a2f6a;
+  --font-sans: 'Space Grotesk', sans-serif;
+  --font-display: 'Orbitron', monospace;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+#cv {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  min-height: 700px;
+  overflow: hidden;
+  position: relative;
+}
+
+canvas#gc {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Page system ── */
+.page {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s ease, transform 0.8s ease;
+  min-height: 700px;
+  z-index: 1;
+  background: transparent;
+}
+
+.page.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(40px);
+}
+
+.page.out {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-80px);
+}
+
+/* ── Shared spinner ── */
+.spinning {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Scrollbar ── */
+#p-results::-webkit-scrollbar { width: 4px; }
+#p-results::-webkit-scrollbar-track { background: transparent; }
+#p-results::-webkit-scrollbar-thumb { background: #4a2f6a; border-radius: 4px; }
